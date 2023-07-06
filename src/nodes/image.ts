@@ -8,6 +8,7 @@ import { GraphicsNode } from './graphicsnode'
 import { Rect } from '../utils/geometry'
 import { Matrix } from 'jspdf'
 import { Viewport } from '../context/viewport'
+import { ImageCompression } from 'jspdf'
 
 // groups: 1: mime-type (+ charset), 2: mime-type (w/o charset), 3: charset, 4: base64?, 5: body
 export const dataUriRegex = /^\s*data:(([^/,;]+\/[^/,;]+)(?:;([^,;=]+=[^,;=]+))?)?(?:;(base64))?,(.*\s*)$/i
@@ -82,7 +83,10 @@ export class ImageNode extends GraphicsNode {
           x,
           y,
           width,
-          height
+          height,
+          undefined,
+          context.svg2pdfParameters.compressBitmaps,  // see compression parameter for http://raw.githack.com/MrRio/jsPDF/master/docs/module-addImage.html
+          0
         )
       } catch (e) {
         typeof console === 'object' &&

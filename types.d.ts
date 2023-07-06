@@ -1,3 +1,4 @@
+import { ImageCompression } from 'jspdf'
 import { jsPDF } from 'jspdf'
 
 declare module 'svg2pdf.js' {
@@ -67,4 +68,12 @@ export interface Svg2pdfOptions {
    * policies are ignored. The default is false.
    */
   loadExternalStyleSheets?: boolean
+
+  /**
+   * Compression of included bitmaps.
+   * 
+   * see ImageCompression at /jsPDF/types/index.d.ts
+   * see /jsPDF/src/modules/addImage.js method addImage()
+   */
+  compressBitmaps?: ImageCompression
 }

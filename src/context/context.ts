@@ -4,6 +4,7 @@ import { TextMeasure } from './textmeasure'
 import { StyleSheets } from './stylesheets'
 import { jsPDF, Matrix } from 'jspdf'
 import { Viewport } from './viewport'
+import { ImageCompression } from 'jspdf'
 
 /**
  *
@@ -82,4 +83,5 @@ export interface Svg2pdfParameters {
   width?: number
   height?: number
   loadExternalStyleSheets?: boolean
+  compressBitmaps?: ImageCompression
 }
