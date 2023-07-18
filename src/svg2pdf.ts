@@ -21,7 +21,7 @@ export async function svg2pdf(
   const refsHandler = new ReferencesHandler(idMap)
 
   const styleSheets = new StyleSheets(element, extCss)
-  await styleSheets.load()
+  //await styleSheets.load() @development
 
   // start with the entire page size as viewport
   const viewport = new Viewport(pdf.internal.pageSize.getWidth(), pdf.internal.pageSize.getHeight())
