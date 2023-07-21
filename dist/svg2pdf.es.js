@@ -1,20 +1,20 @@
 /**
  * The MIT License (MIT)
- * 
- * Copyright (c) 2015-2021 yWorks GmbH
+ *
+ * Copyright (c) 2015-2023 yWorks GmbH
  * Copyright (c) 2013-2015 by Vitaly Puzrin
- * 
- * 
+ *
+ *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
  * in the Software without restriction, including without limitation the rights
  * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
  * copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- * 
+ *
  * The above copyright notice and this permission notice shall be included in all
  * copies or substantial portions of the Software.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -24,13 +24,22 @@
  * SOFTWARE.
  */
 
-import cssEsc from 'cssesc';
-import FontFamily from 'font-family-papandreou';
-import jsPDF, { GState, ShadingPattern, TilingPattern, jsPDF as jsPDF$1 } from 'jspdf';
-import SvgPath from 'svgpath';
-import { compare } from 'specificity';
+import cssEsc from 'npm:cssesc@^3.0.0';
+import FontFamily from 'npm:font-family-papandreou@^0.2.0-patch1';
+import jsPDF, { GState, ShadingPattern, TilingPattern, jsPDF as jsPDF$1 } from 'npm:jspdf@2.5.1';
+import SvgPath from 'npm:svgpath@^2.3.0';
+import { compare } from 'npm:specificity@^0.4.1';
+//import { JSDOM } from 'jsdom';
 
-/*! *****************************************************************************
+//import { DOMParser } from "https://deno.land/x/deno_dom/deno-dom-wasm.ts";
+import { DOMParser } from "../../deno-dom/deno-dom-wasm.ts"; // forked version "deno-dom" of repository
+
+var document = new DOMParser().parseFromString(`<html><head></head><body></body></html>`, 'text/html'); // change
+/* const doc = new JSDOM();
+globalThis.document = doc.window.document;
+globalThis.HTMLIFrameElement = doc.window.HTMLIFrameElement; */
+
+/******************************************************************************
 Copyright (c) Microsoft Corporation.
 
 Permission to use, copy, modify, and/or distribute this software for any
@@ -44,16 +53,18 @@ LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR
 OTHER TORTIOUS ACTION, ARISING OUT OF OR IN CONNECTION WITH THE USE OR
 PERFORMANCE OF THIS SOFTWARE.
 ***************************************************************************** */
-/* global Reflect, Promise */
+/* global Reflect, Promise, SuppressedError, Symbol */
 
 var extendStatics = function(d, b) {
     extendStatics = Object.setPrototypeOf ||
         ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+        function (d, b) { for (var p in b) if (Object.prototype.hasOwnProperty.call(b, p)) d[p] = b[p]; };
     return extendStatics(d, b);
 };
 
 function __extends(d, b) {
+    if (typeof b !== "function" && b !== null)
+        throw new TypeError("Class extends value " + String(b) + " is not a constructor or null");
     extendStatics(d, b);
     function __() { this.constructor = d; }
     d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
@@ -86,7 +97,7 @@ function __generator(thisArg, body) {
     function verb(n) { return function (v) { return step([n, v]); }; }
     function step(op) {
         if (f) throw new TypeError("Generator is already executing.");
-        while (_) try {
+        while (g && (g = 0, op[0] && (_ = 0)), _) try {
             if (f = 1, y && (t = op[0] & 2 ? y["return"] : op[0] ? y["throw"] || ((t = y["return"]) && t.call(y), 0) : y.next) && !(t = t.call(y, op[1])).done) return t;
             if (y = 0, t) op = [op[0] & 2, t.value];
             switch (op[0]) {
@@ -107,6 +118,11 @@ function __generator(thisArg, body) {
         if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
     }
 }
+
+var _SuppressedError = typeof SuppressedError === "function" ? SuppressedError : function (error, suppressed, message) {
+    var e = new Error(message);
+    return e.name = "SuppressedError", e.error = error, e.suppressed = suppressed, e;
+};
 
 /* eslint-disable @typescript-eslint/no-explicit-any,@typescript-eslint/explicit-module-boundary-types */
 var RGBColor = /** @class */ (function () {
@@ -544,14 +560,19 @@ var TextMeasure = /** @class */ (function () {
             this.textMeasuringTextElement = document.createElementNS(svgNamespaceURI, 'text');
             var svg = document.createElementNS(svgNamespaceURI, 'svg');
             svg.appendChild(this.textMeasuringTextElement);
-            svg.style.setProperty('position', 'absolute');
-            svg.style.setProperty('visibility', 'hidden');
+            // change TODO
+            /*svg.style.setProperty('position', 'absolute');
+            svg.style.setProperty('visibility', 'hidden');*/
+            svg.setAttribute('style', 'position: absolute; visibility: hidden')
             document.body.appendChild(svg);
         }
         return this.textMeasuringTextElement;
     };
     TextMeasure.prototype.canvasTextMeasure = function (text, fontFamily, fontSize, fontStyle, fontWeight) {
         var canvas = document.createElement('canvas');
+        // when run on Deno, using deno_dom getContext() is not a function
+        if(typeof canvas.getContext !== 'function') return 0 //change
+
         var context = canvas.getContext('2d');
         if (context != null) {
             context.font = [fontStyle, fontWeight, fontSize, fontFamily].join(' ');
@@ -568,6 +589,8 @@ var TextMeasure = /** @class */ (function () {
         textNode.setAttribute('font-weight', fontWeight);
         textNode.setAttributeNS('http://www.w3.org/XML/1998/namespace', 'xml:space', 'preserve');
         textNode.textContent = text;
+
+        /** @see {@link https://github.com/jsdom/jsdom/issues/918} Discussion in repo /jsdom/jsdom addressing getBBox(). */
         return textNode.getBBox().width;
     };
     /**
@@ -1025,7 +1048,7 @@ function findFirstAvailableFontFamily(attributeState, fontFamilies, context) {
     return firstAvailable;
 }
 var isJsPDF23 = (function () {
-    var parts = jsPDF.version.split('.');
+    var parts = jsPDF$1.version.split('.'); // change
     return parseFloat(parts[0]) === 2 && parseFloat(parts[1]) === 3;
 })();
 function combineFontStyleAndFontWeight(fontStyle, fontWeight) {
@@ -3052,7 +3075,8 @@ var ImageNode = /** @class */ (function (_super) {
                         dataUri = "data:image/" + format + ";base64," + btoa(data);
                         try {
                             context.pdf.addImage(dataUri, '', // will be ignored anyways if imageUrl is a data url
-                            x, y, width, height);
+                            x, y, width, height, undefined, context.svg2pdfParameters.compressBitmaps, // see compression parameter for http://raw.githack.com/MrRio/jsPDF/master/docs/module-addImage.html
+                            0);
                         }
                         catch (e) {
                             typeof console === 'object' &&
@@ -3886,11 +3910,6 @@ function svg2pdf(element, pdf, options) {
                     idMap = {};
                     refsHandler = new ReferencesHandler(idMap);
                     styleSheets = new StyleSheets(element, extCss);
-                    return [4 /*yield*/, styleSheets.load()
-                        // start with the entire page size as viewport
-                    ];
-                case 1:
-                    _d.sent();
                     viewport = new Viewport(pdf.internal.pageSize.getWidth(), pdf.internal.pageSize.getHeight());
                     svg2pdfParameters = __assign(__assign({}, options), { element: element });
                     context = new Context(pdf, { refsHandler: refsHandler, styleSheets: styleSheets, viewport: viewport, svg2pdfParameters: svg2pdfParameters });
@@ -3907,7 +3926,7 @@ function svg2pdf(element, pdf, options) {
                     pdf.setFontSize(context.attributeState.fontSize * pdf.internal.scaleFactor);
                     node = parse(element, idMap);
                     return [4 /*yield*/, node.render(context)];
-                case 2:
+                case 1:
                     _d.sent();
                     pdf.restoreGraphicsState();
                     pdf.compatAPI();
