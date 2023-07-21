@@ -32,7 +32,7 @@ import { compare } from 'npm:specificity@^0.4.1';
 //import { JSDOM } from 'jsdom';
 
 //import { DOMParser } from "https://deno.land/x/deno_dom/deno-dom-wasm.ts";
-import { DOMParser } from "../../deno-dom/deno-dom-wasm.ts"; // forked version "deno-dom" of repository
+import { DOMParser } from "https://raw.githubusercontent.com/cschlusche/deno-dom/feat-namespace-svg/deno-dom-wasm.ts"; // forked version "deno-dom" of repository
 
 var document = new DOMParser().parseFromString(`<html><head></head><body></body></html>`, 'text/html'); // change
 /* const doc = new JSDOM();
